@@ -8,7 +8,7 @@ app.use(express.json());
 app.use(cors({
     origin: [
         'http://localhost:5173',
-        'https://online-shop12-7b3e8.web.app'
+        'https://inventory-management-354ce.web.app'
     ],
     credentials: true
 }));
@@ -32,6 +32,7 @@ async function run() {
         const postCollection = client.db('inventory_management').collection('allpost');
         const contactCollection = client.db('inventory_management').collection('contact');
         const productCollection = client.db('inventory_management').collection('product');
+        const selproductCollection = client.db('inventory_management').collection('selproduct');
 
         // Route to add a new user
         app.post('/users', async (req, res) => {
@@ -72,6 +73,7 @@ async function run() {
             const result = await productCollection.findOne(query)
             res.send(result)
         })
+
         app.delete('/deleteproduct/:id', async (req, res) => {
             const id = req?.params?.id;
             const query = { _id: new ObjectId(id) }
@@ -88,11 +90,29 @@ async function run() {
             const updateDoc = {
                 $set: {
                     number: data.producctNumber,
-                    updateEmail:data.email,
-                    updateupdatedate:data.updatedate
+                    updateEmail: data.email,
+                    updateupdatedate: data.updatedate
                 }
             }
             const result = await productCollection.updateOne(filter, updateDoc, option);
+            res.send(result)
+        })
+
+        // sel product 
+        app.post('/selproduct', async (req, res) => {
+            const data = req.body;
+            const result = await selproductCollection.insertOne(data)
+            res.send(result)
+        })
+        // get sel product
+        app.get('/getselproduct', async (req, res) => {
+            const result = await selproductCollection.find().toArray()
+            res.send(result)
+        })
+        app.get('/getselproductid/:id', async (req, res) => {
+            const id = req?.params?.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await selproductCollection.findOne(query)
             res.send(result)
         })
 
@@ -107,6 +127,12 @@ async function run() {
         })
         app.get('/adminpostget', async (req, res) => {
             const result = await postCollection.find().toArray()
+            res.send(result)
+        })
+        app.delete('/adminpostgetdelete/:id', async (req, res) => {
+            const id = req?.params?.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await postCollection.deleteOne(query)
             res.send(result)
         })
 
